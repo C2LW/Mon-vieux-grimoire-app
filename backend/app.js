@@ -2,6 +2,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 
+const userRoutes = require('./routes/user');
+
 const app = express();
 
 mongoose.connect('mongodb+srv://main_db_user:HTDLW0bjKMeXkinm@cluster-001.dfhq8gi.mongodb.net/?appName=cluster-001',
@@ -9,6 +11,9 @@ mongoose.connect('mongodb+srv://main_db_user:HTDLW0bjKMeXkinm@cluster-001.dfhq8g
     useUnifiedTopology: true })
   .then(() => console.log('Connexion à MongoDB réussie !'))
   .catch(() => console.log('Connexion à MongoDB échouée !'));
+
+
+app.use('/api/auth', userRoutes);
 
 
 module.exports = app;
