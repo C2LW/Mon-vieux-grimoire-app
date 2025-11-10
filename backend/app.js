@@ -17,7 +17,7 @@ app.use((req, res, next) => {
     next();
 });
 
-mongoose.connect('mongodb+srv://main_db_user:HTDLW0bjKMeXkinm@cluster-001.dfhq8gi.mongodb.net/?appName=cluster-001',
+mongoose.connect('mongodb+srv://mvg_db_user:IoLOcKeXedXaVtt7@cluster0.1xtaogh.mongodb.net/?appName=Cluster0',
     {
         useNewUrlParser: true,
         useUnifiedTopology: true
