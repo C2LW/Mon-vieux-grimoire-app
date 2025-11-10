@@ -4,9 +4,8 @@ const Book = require('../modeles/Books');
 exports.createBook = async (req, res) => {
     try {
         console.log('POST /api/books body:', req.body);
-        // tout en haut de createBook
-        console.log('Content-Type:', req.headers['content-type']); // -> multipart/form-data ? application/json ?
-        console.log('Body:', req.body); // undefined actuellement
+        console.log('Content-Type:', req.headers['content-type']);
+        console.log('Body:', req.body);
 
         const { userId, title, author, imageUrl, year, genre, grade, averageRating } = req.body;
 
@@ -34,6 +33,9 @@ exports.createBook = async (req, res) => {
     };
 };
 
+
+
+
 /* exports.modifyBook = (req, res, next) => {
 
 };
@@ -43,7 +45,7 @@ exports.deleteBook = (req, res, next) => {
 };
 
 exports.getAllBooks = (req, res, next) => {
-
+    
 };
 
 exports.getOneBook = (req, res, next) => {
