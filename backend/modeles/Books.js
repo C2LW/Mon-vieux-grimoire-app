@@ -1,16 +1,20 @@
 /* eslint-disable no-undef */
 const mongoose = require('mongoose');
-const ratingsSchema = require('Rating');
 
-const booksSchema = mongoose.Schema({
-    userId : {Type: String, require: true},            // - identifiant MongoDB unique de l'utilisateur qui a créé le livre
-    title : {Type: String, require: true},             // - titre du livre
-    author : {Type: String, require: true},            // - auteur du livre
-    imageUrl : {Type: String, require: true},          // - illustration/couverture du livre
-    year: {Type: Number, require: true},               // - année de publication du livre
-    genre: {Type: String, require: true},              // - genre du livre
-    ratings : [ratingsSchema],
-    averageRating : {Type: String, require: false},     // - note moyenne du livre
-});
+const ratingSchema = new mongoose.Schema({
+    userId: { type: String, required: true },
+    grade: { type: Number, required: true, min: 0, max: 5 }
+}, { _id: false });
 
-module.exports = mongoose.model('Books', booksSchema);
+const booksSchema = new mongoose.Schema({
+    userId: { type: String, required: true },  // id de l'utilisateur créateur
+    title: { type: String, required: true, trim: true },
+    author: { type: String, required: true, trim: true },
+    imageUrl: { type: String, required: true },
+    year: { type: Number, required: true },
+    genre: { type: String, required: true },
+    ratings: { type: [ratingSchema], default: [] },
+    averageRating: { type: Number, default: 0 }        // mieux en Number qu'en String
+}, { timestamps: true });
+
+module.exports = mongoose.model('Book', booksSchema);
