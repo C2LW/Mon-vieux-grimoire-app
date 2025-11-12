@@ -1,5 +1,6 @@
 /* eslint-disable no-undef */
 const multer = require('multer');
+const path = require('path');
 
 const MIME_TYPES = {
     'image/jpg': 'jpg',
@@ -7,12 +8,29 @@ const MIME_TYPES = {
     'image/png': 'png'
 };
 
+function slugifyFileName(original) {
+
+    const extractName = path.extname(original);
+    const base = path.basename(original, extractName);
+
+    const cleanName = base
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')       // diacritiques
+        .replace(/[^a-zA-Z0-9_-]/g, '_')        // caractères non sûrs
+        .replace(/_+/g, '_')                    // multiples _
+        .replace(/^_+|_+$/g, '')                // trim
+        .toLowerCase();
+
+    return cleanName || 'image';
+};
+
+
 const storage = multer.diskStorage({
     destination: (req, file, callback) => {
-        callback(null, 'images');
+        callback(null, '/images');
     },
     filename: (req, file, callback) => {
-        const name = file.originalname.split(' ').join('_');
+        const name = slugifyFileName(file.originalname);
         const extension = MIME_TYPES[file.mimetype];
         callback(null, name + Date.now() + '.' + extension);
     }
