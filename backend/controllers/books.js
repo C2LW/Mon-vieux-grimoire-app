@@ -3,6 +3,62 @@ const Book = require('../modeles/Books');
 const mongoose = require('mongoose');
 const fs = require('fs');
 
+function computeAverageRating(ratings) {
+    if (!ratings || ratings.length === 0) return 0;
+    const sum = ratings.reduce((total, r) => total + r.grade, 0);
+    return Math.round((sum / ratings.length) * 10) / 10; // arrondi à 0.1 près
+}
+
+exports.getBestRating = async (req, res) => {
+    try {
+        const bestBooks = await Book
+            .find()
+            .sort({ averageRating: -1 })
+            .limit(3);
+
+        res.status(200).json(bestBooks);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+exports.rateBook = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const userId = req.auth.userId;
+        const grade = Number(req.body.rating ?? req.body.grade);
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ error: 'Invalid book id' });
+        }
+
+        if (Number.isNaN(grade) || grade < 0 || grade > 5) {
+            return res.status(400).json({ error: 'La note doit être un nombre entre 0 et 5' });
+        }
+
+        const book = await Book.findById(id);
+        if (!book) {
+            return res.status(404).json({ error: 'Book not found' });
+        }
+
+        const existingRating = book.ratings.find(r => r.userId === userId);
+        if (existingRating) {
+            return res.status(400).json({ error: 'Vous avez déjà noté ce livre' });
+        } else {
+            book.ratings.push({ userId, grade });
+        }
+
+        book.averageRating = computeAverageRating(book.ratings);
+
+        const updated = await book.save();
+
+        res.status(201).json(updated);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+
 exports.createBook = async (req, res) => {
     try {
         const bookObject = JSON.parse(req.body.book);
@@ -32,6 +88,7 @@ exports.getAllBooks = async (req, res) => {
     }
 };
 
+
 exports.getOneBook = (req, res) => {
     Book.findOne({
         _id: req.params.id
@@ -47,6 +104,7 @@ exports.getOneBook = (req, res) => {
         }
     );
 };
+
 
 exports.getOneBook = async (req, res) => {
     try {
@@ -64,6 +122,7 @@ exports.getOneBook = async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 };
+
 
 exports.modifyBook = (req, res) => {
     const bookObject = req.file ? {
@@ -87,6 +146,7 @@ exports.modifyBook = (req, res) => {
         });
 };
 
+
 exports.deleteBook = (req, res) => {
     Book.findOne({ _id: req.params.id })
         .then(book => {
@@ -105,9 +165,3 @@ exports.deleteBook = (req, res) => {
             res.status(500).json({ error });
         });
 };
-
-
-
-/* 
-
- */
