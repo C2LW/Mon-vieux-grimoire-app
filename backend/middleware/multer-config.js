@@ -27,7 +27,8 @@ function slugifyFileName(original) {
 
 const storage = multer.diskStorage({
     destination: (req, file, callback) => {
-        callback(null, '/images');
+        const uploadDir = path.join(__dirname, '..', 'images');
+        callback(null, uploadDir);
     },
     filename: (req, file, callback) => {
         const name = slugifyFileName(file.originalname);
