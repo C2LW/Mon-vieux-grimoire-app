@@ -1,7 +1,9 @@
 /* eslint-disable no-undef */
+const sharp = require('sharp');
+const fs = require('fs/promises');
+const path = require('path');
 const Book = require('../modeles/Books');
 const mongoose = require('mongoose');
-const fs = require('fs');
 
 function computeAverageRating(ratings) {
     if (!ratings || ratings.length === 0) return 0;
@@ -62,17 +64,33 @@ exports.rateBook = async (req, res) => {
 exports.createBook = async (req, res) => {
     try {
         const bookObject = JSON.parse(req.body.book);
+
         delete bookObject._id;
         delete bookObject.userId;
+
+        const originalPath = path.join(__dirname, '..', 'images', req.file.filename);
+
+        const compressedFilename = req.file.filename.replace(/\.(jpg|jpeg|png)$/i, '') + '.webp';
+        const compressedPath = path.join(__dirname, '..', 'images', compressedFilename);
+
+        await sharp(originalPath)
+            .resize({ width: 800 })
+            .webp({ quality: 70 })
+            .toFile(compressedPath);
+
+        await fs.unlink(originalPath);
 
         const book = new Book({
             ...bookObject,
             userId: req.auth.userId,
-            imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
+            imageUrl: `${req.protocol}://${req.get('host')}/images/${compressedFilename}`,
+            ratings: [],
+            averageRating: 0
         });
 
         const saved = await book.save();
         res.status(201).json(saved);
+
     } catch (error) {
         res.status(400).json({ error: error.message });
     }

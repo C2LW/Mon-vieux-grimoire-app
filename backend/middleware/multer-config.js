@@ -9,21 +9,19 @@ const MIME_TYPES = {
 };
 
 function slugifyFileName(original) {
-
     const extractName = path.extname(original);
     const base = path.basename(original, extractName);
 
     const cleanName = base
         .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')       // diacritiques
-        .replace(/[^a-zA-Z0-9_-]/g, '_')        // caractères non sûrs
-        .replace(/_+/g, '_')                    // multiples _
-        .replace(/^_+|_+$/g, '')                // trim
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-zA-Z0-9_-]/g, '_')
+        .replace(/_+/g, '_')
+        .replace(/^_+|_+$/g, '')
         .toLowerCase();
 
     return cleanName || 'image';
-};
-
+}
 
 const storage = multer.diskStorage({
     destination: (req, file, callback) => {
@@ -37,4 +35,4 @@ const storage = multer.diskStorage({
     }
 });
 
-module.exports = multer({ storage: storage }).single('image');
+module.exports = multer({ storage }).single('image');
