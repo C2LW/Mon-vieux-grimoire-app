@@ -18,7 +18,9 @@ app.use((req, res, next) => {
     next();
 });
 
-mongoose.connect('mongodb+srv://mvg_db_user:IoLOcKeXedXaVtt7@cluster0.1xtaogh.mongodb.net/?appName=Cluster0',
+const uri = `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_CLUSTER}/${process.env.MONGO_DBNAME}?retryWrites=true&w=majority&appName=${process.env.MONGO_DBNAME}`;
+
+mongoose.connect(uri,
     {
         useNewUrlParser: true,
         useUnifiedTopology: true
