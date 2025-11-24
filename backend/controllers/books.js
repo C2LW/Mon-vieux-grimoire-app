@@ -165,21 +165,31 @@ exports.modifyBook = (req, res) => {
 };
 
 
-exports.deleteBook = (req, res) => {
-    Book.findOne({ _id: req.params.id })
-        .then(book => {
-            if (book.userId != req.auth.userId) {
-                res.status(401).json({ message: 'Not authorized' });
-            } else {
-                const filename = book.imageUrl.split('/images/')[1];
-                fs.unlink(`images/${filename}`, () => {
-                    Book.deleteOne({ _id: req.params.id })
-                        .then(() => { res.status(200).json({ message: 'Objet supprimé !' }) })
-                        .catch(error => res.status(401).json({ error }));
-                });
-            }
-        })
-        .catch(error => {
-            res.status(500).json({ error });
-        });
+exports.deleteBook = async (req, res) => {
+    try {
+        const book = await Book.findById(req.params.id);
+
+        if (!book) {
+            return res.status(404).json({ message: 'Book not found' });
+        }
+
+        if (book.userId !== req.auth.userId) {
+            return res.status(403).json({ message: 'Bad request' });
+        }
+
+        const filename = book.imageUrl.split('/images/')[1];
+
+        try {
+            await fs.promises.unlink(`images/${filename}`);
+        } catch (err) {
+            console.error('Error to delete image :', err);
+        }
+
+        await Book.deleteOne({ _id: req.params.id });
+
+        res.status(200).json({ message: 'Book successfully deleted !' });
+
+    } catch (error) {
+        res.status(500).json({ error });
+    }
 };
